@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GeoCoordinatePortable;
+using PoGo.NecroBot.CLI;
 using PoGo.NecroBot.Logic.Common;
 using PoGo.NecroBot.Logic.Event;
 using PoGo.NecroBot.Logic.Logging;
@@ -13,6 +14,7 @@ using PoGo.NecroBot.Logic.Utils;
 using PokemonGo.RocketAPI.Extensions;
 using POGOProtos.Map.Fort;
 using POGOProtos.Networking.Responses;
+using System.Threading;
 
 #endregion
 
@@ -52,9 +54,11 @@ namespace PoGo.NecroBot.Logic.Tasks
                 {
                     Message = ctx.Translations.GetTranslation(TranslationString.FarmPokestopsNoUsableFound)
                 });
+
+                await resetLocation(ctx, machine);
             }
 
-            machine.Fire(new PokeStopListEvent {Forts = pokestopList});
+            machine.Fire(new PokeStopListEvent { Forts = pokestopList });
 
             while (pokestopList.Any())
             {
@@ -71,7 +75,7 @@ namespace PoGo.NecroBot.Logic.Tasks
                     ctx.Client.CurrentLongitude, pokeStop.Latitude, pokeStop.Longitude);
                 var fortInfo = await ctx.Client.Fort.GetFort(pokeStop.Id, pokeStop.Latitude, pokeStop.Longitude);
 
-                machine.Fire(new FortTargetEvent {Name = fortInfo.Name, Distance = distance});
+                machine.Fire(new FortTargetEvent { Name = fortInfo.Name, Distance = distance });
 
                 await ctx.Navigation.HumanLikeWalking(new GeoCoordinate(pokeStop.Latitude, pokeStop.Longitude),
                     ctx.LogicSettings.WalkingSpeedInKilometerPerHour,
@@ -94,7 +98,8 @@ namespace PoGo.NecroBot.Logic.Tasks
                 var fortRetry = 0;      //Current check
                 const int retryNumber = 50; //How many times it needs to check to clear softban
                 const int zeroCheck = 5; //How many times it checks fort before it thinks it's softban
-                do {
+                do
+                {
                     fortSearch = await ctx.Client.Fort.SearchFort(pokeStop.Id, pokeStop.Latitude, pokeStop.Longitude);
                     if (fortSearch.ExperienceAwarded > 0 && TimesZeroXPawarded > 0) TimesZeroXPawarded = 0;
                     if (fortSearch.ExperienceAwarded == 0)
@@ -119,7 +124,9 @@ namespace PoGo.NecroBot.Logic.Tasks
                             Random random = new Random();
                             await Task.Delay(200 + random.Next(0, 200));  //Randomized pause
                         }
-                    } else {
+                    }
+                    else
+                    {
                         machine.Fire(new FortUsedEvent
                         {
                             Exp = fortSearch.ExperienceAwarded,
@@ -129,10 +136,10 @@ namespace PoGo.NecroBot.Logic.Tasks
 
                         break; //Continue with program as loot was succesfull.
                     }
-                    } while (fortRetry < retryNumber - zeroCheck); //Stop trying if softban is cleaned earlier or if 40 times fort looting failed.
+                } while (fortRetry < retryNumber - zeroCheck); //Stop trying if softban is cleaned earlier or if 40 times fort looting failed.
 
                 await Task.Delay(1000);
-                if (++stopsHit%5 == 0) //TODO: OR item/pokemon bag is full
+                if (++stopsHit % 5 == 0) //TODO: OR item/pokemon bag is full
                 {
                     stopsHit = 0;
                     if (fortSearch.ItemsAwarded.Count > 0)
@@ -159,6 +166,36 @@ namespace PoGo.NecroBot.Logic.Tasks
                 }
             }
         }
+
+        private static async Task resetLocation(Context ctx, StateMachine machine)
+        {
+            Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("EN-US");
+
+            if (GlobalSettings.irLastPokeStopIndex >= GlobalSettings.lstPokeStopLocations.Count)
+            {
+                GlobalSettings.irLastPokeStopIndex = 0;
+            }
+
+            Logger.Write("Re setting global location no Poke Stop index " + GlobalSettings.irLastPokeStopIndex + " : "
+                + GlobalSettings.lstPokeStopLocations[GlobalSettings.irLastPokeStopIndex], LogLevel.Self, ConsoleColor.Yellow);
+
+            double dblLat = Convert.ToDouble(GlobalSettings.lstPokeStopLocations[GlobalSettings.irLastPokeStopIndex].Split(':')[0]);
+            double dblLng = Convert.ToDouble(GlobalSettings.lstPokeStopLocations[GlobalSettings.irLastPokeStopIndex].Split(':')[1]);
+            GlobalSettings.irLastPokeStopIndex++;
+
+            await ctx.Navigation.HumanLikeWalking(new GeoCoordinate(dblLat, dblLng),
+    ctx.LogicSettings.WalkingSpeedInKilometerPerHour,
+    async () =>
+    {
+        // Catch normal map Pokemon
+        await CatchNearbyPokemonsTask.Execute(ctx, machine);
+        //Catch Incense Pokemon
+        await CatchIncensePokemonsTask.Execute(ctx, machine);
+        return true;
+    });
+        }
+
+
 
         private static async Task<List<FortData>> GetPokeStops(Context ctx)
         {
