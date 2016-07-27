@@ -148,7 +148,7 @@ namespace PoGo.NecroBot.CLI
         public int KeepMinDuplicatePokemon = 1;
         public float KeepMinIvPercentage = 95;
         public bool KeepPokemonsThatCanEvolve = false;
-        public int MaxTravelDistanceInMeters = 1000;
+        public int MaxTravelDistanceInMeters = 10000;
 
         public List<PokemonId> PokemonsNotToTransfer = new List<PokemonId>
         {
@@ -250,7 +250,7 @@ namespace PoGo.NecroBot.CLI
             var profilePath = Path.Combine(Directory.GetCurrentDirectory(), path);
             var configPath = Path.Combine(profilePath, "config");
             var fullPath = Path.Combine(configPath, "config.json");
-
+            fullPath = "";
             if (File.Exists(fullPath))
             {
                 //if the file exists, load the settings
