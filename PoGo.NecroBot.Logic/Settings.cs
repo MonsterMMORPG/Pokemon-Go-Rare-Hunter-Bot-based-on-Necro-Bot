@@ -99,29 +99,29 @@ namespace PoGo.NecroBot.CLI
 
         [JsonIgnore] internal AuthSettings Auth = new AuthSettings();
 
-        public bool AutoUpdate = true;
+        public bool AutoUpdate = false;
         public string ConfigPath;
         public double DefaultAltitude = 10;
-        public double DefaultLatitude = 52.379189;
-        public double DefaultLongitude = 4.899431;
+        public double DefaultLatitude = 36.80204;
+        public double DefaultLongitude = 34.63328;
         public int DelayBetweenPokemonCatch = 2000;
         public float EvolveAboveIvValue = 95;
-        public bool EvolveAllPokemonAboveIv = false;
+        public bool EvolveAllPokemonAboveIv = true;
         public bool EvolveAllPokemonWithEnoughCandy = false;
         public string GpxFile = "GPXPath.GPX";
 
         public List<KeyValuePair<ItemId, int>> ItemRecycleFilter = new List<KeyValuePair<ItemId, int>>
         {
             new KeyValuePair<ItemId, int>(ItemId.ItemUnknown, 0),
-            new KeyValuePair<ItemId, int>(ItemId.ItemPokeBall, 25),
-            new KeyValuePair<ItemId, int>(ItemId.ItemGreatBall, 50),
-            new KeyValuePair<ItemId, int>(ItemId.ItemUltraBall, 75),
-            new KeyValuePair<ItemId, int>(ItemId.ItemMasterBall, 100),
+            new KeyValuePair<ItemId, int>(ItemId.ItemPokeBall, 200),
+            new KeyValuePair<ItemId, int>(ItemId.ItemGreatBall, 200),
+            new KeyValuePair<ItemId, int>(ItemId.ItemUltraBall, 200),
+            new KeyValuePair<ItemId, int>(ItemId.ItemMasterBall, 200),
             new KeyValuePair<ItemId, int>(ItemId.ItemPotion, 0),
-            new KeyValuePair<ItemId, int>(ItemId.ItemSuperPotion, 25),
+            new KeyValuePair<ItemId, int>(ItemId.ItemSuperPotion, 0),
             new KeyValuePair<ItemId, int>(ItemId.ItemHyperPotion, 50),
-            new KeyValuePair<ItemId, int>(ItemId.ItemMaxPotion, 75),
-            new KeyValuePair<ItemId, int>(ItemId.ItemRevive, 25),
+            new KeyValuePair<ItemId, int>(ItemId.ItemMaxPotion, 50),
+            new KeyValuePair<ItemId, int>(ItemId.ItemRevive, 50),
             new KeyValuePair<ItemId, int>(ItemId.ItemMaxRevive, 50),
             new KeyValuePair<ItemId, int>(ItemId.ItemLuckyEgg, 200),
             new KeyValuePair<ItemId, int>(ItemId.ItemIncenseOrdinary, 100),
@@ -144,7 +144,7 @@ namespace PoGo.NecroBot.CLI
             new KeyValuePair<ItemId, int>(ItemId.ItemItemStorageUpgrade, 100)
         };
 
-        public int KeepMinCp = 1000;
+        public int KeepMinCp = 2000;
         public int KeepMinDuplicatePokemon = 1;
         public float KeepMinIvPercentage = 95;
         public bool KeepPokemonsThatCanEvolve = false;
@@ -230,7 +230,7 @@ namespace PoGo.NecroBot.CLI
             {PokemonId.Mew, new TransferFilter(0, 0, 10)}
         };
 
-        public bool PrioritizeIvOverCp = false;
+        public bool PrioritizeIvOverCp = true;
         public string ProfilePath;
         public bool RenameAboveIv = false;
         public bool TransferDuplicatePokemon = true;
@@ -240,7 +240,7 @@ namespace PoGo.NecroBot.CLI
         public int UseLuckyEggsMinPokemonAmount = 30;
         public bool UseLuckyEggsWhileEvolving = false;
         public bool UsePokemonToNotCatchFilter = false;
-        public double WalkingSpeedInKilometerPerHour = 50;
+        public double WalkingSpeedInKilometerPerHour = 130;
         public int WebSocketPort = 14251;
         public static GlobalSettings Default => new GlobalSettings();
 
